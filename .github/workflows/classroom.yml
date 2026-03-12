@@ -1,0 +1,57 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: test1-1
+      id: test1-1
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: test1-1
+        setup-command: gcc code/1-1.c -o code/1-1.exe
+        command: "./code/1-1.exe"
+        input: " "
+        expected-output: |-
+          int : 100
+          hex : 64
+          oct : 144
+          char : c
+          string : hello world!
+          float : 3.141592
+          exp : 3.141592e+00
+        comparison-method: contains
+        timeout: 10
+        max-score: 1
+    - name: test1-2
+      id: test1-2
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: test1-2
+        setup-command: gcc code/1-2.c -o code/1-2.exe
+        command: "./code/1-2.exe"
+        input: ''
+        expected-output: |2
+                name         id      value
+                 kim 0000000012       4.12
+                 lee 0000001922       3.21
+                park 0000000432       1.00
+        comparison-method: contains
+        timeout: 10
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST1-1_RESULTS: "${{steps.test1-1.outputs.result}}"
+        TEST1-2_RESULTS: "${{steps.test1-2.outputs.result}}"
+      with:
+        runners: test1-1,test1-2
